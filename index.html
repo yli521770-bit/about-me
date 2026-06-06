@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人主页 - 关于我</title>
+<style>
+  /* ========== Reset & Base ========== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0e14;
+    --surface: #131820;
+    --surface-hover: #1a2230;
+    --border: #1e2a3a;
+    --text-primary: #e6edf3;
+    --text-secondary: #8b949e;
+    --text-muted: #5c6670;
+    --accent: #00d4aa;
+    --accent-glow: rgba(0, 212, 170, 0.25);
+    --blue: #58a6ff;
+    --purple: #a371f7;
+    --gradient: linear-gradient(135deg, var(--accent) 0%, var(--blue) 50%, var(--purple) 100%);
+    --radius: 12px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ========== Animated background grid ========== */
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(0, 212, 170, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 212, 170, 0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 60% 60% at 50% 30%, black 30%, transparent 70%);
+  }
+
+  .bg-glow {
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    filter: blur(180px);
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .bg-glow--top {
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+  }
+  .bg-glow--bottom {
+    bottom: -200px;
+    right: -150px;
+    background: var(--purple);
+  }
+
+  /* ========== Layout ========== */
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+
+  /* ========== Header / Hero ========== */
+  .hero {
+    text-align: center;
+    padding: 80px 0 60px;
+  }
+
+  .avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: var(--gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 32px;
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--bg);
+    position: relative;
+    box-shadow: 0 0 60px var(--accent-glow);
+    animation: avatarPulse 3s ease-in-out infinite;
+  }
+  @keyframes avatarPulse {
+    0%, 100% { box-shadow: 0 0 40px var(--accent-glow); }
+    50%      { box-shadow: 0 0 80px rgba(0, 212, 170, 0.4); }
+  }
+
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 2.8rem);
+    font-weight: 800;
+    background: var(--gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+  }
+
+  .hero .tagline {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-weight: 400;
+  }
+  .hero .tagline .cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1.1em;
+    background: var(--accent);
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+  }
+  @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+  /* ========== Section common ========== */
+  .section {
+    margin-bottom: 48px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 40px;
+    backdrop-filter: blur(12px);
+    transition: border-color var(--transition);
+  }
+  .section:hover {
+    border-color: rgba(0, 212, 170, 0.3);
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 28px;
+    color: var(--text-primary);
+  }
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 20px;
+    background: var(--gradient);
+    border-radius: 2px;
+  }
+
+  /* ========== Intro ========== */
+  .intro-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 640px) {
+    .intro-grid { grid-template-columns: 1fr; }
+    .section { padding: 24px; }
+  }
+
+  .intro-card {
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    transition: border-color var(--transition), transform var(--transition);
+  }
+  .intro-card:hover {
+    border-color: rgba(88, 166, 255, 0.4);
+    transform: translateY(-2px);
+  }
+  .intro-card .label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    margin-bottom: 10px;
+  }
+  .intro-card .value {
+    color: var(--text-primary);
+    font-size: 1rem;
+  }
+  .intro-card .value small {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  /* ========== Skills ========== */
+  .skills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .skill-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 0.88rem;
+    font-family: var(--font-mono);
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    transition: all var(--transition);
+  }
+  .skill-tag:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 20px rgba(0, 212, 170, 0.1);
+  }
+  .skill-tag .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot--green  { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .dot--blue   { background: var(--blue);  box-shadow: 0 0 8px var(--blue); }
+  .dot--purple { background: var(--purple);box-shadow: 0 0 8px var(--purple); }
+
+  /* ========== QR / Contact ========== */
+  .contact-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+    align-items: center;
+  }
+  @media (max-width: 640px) {
+    .contact-grid { grid-template-columns: 1fr; }
+  }
+
+  .qr-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+  .qr-box {
+    width: 180px;
+    height: 180px;
+    background: #fff;
+    border-radius: var(--radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    box-shadow: 0 0 40px rgba(0, 212, 170, 0.15);
+    transition: box-shadow var(--transition);
+  }
+  .qr-box:hover {
+    box-shadow: 0 0 60px rgba(0, 212, 170, 0.3);
+  }
+  /* QR code built with pure CSS/SVG — replace with a real QR image */
+  .qr-svg {
+    width: 100%;
+    height: 100%;
+  }
+  .qr-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    text-align: center;
+  }
+
+  .contact-links {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .contact-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: var(--radius);
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 0.92rem;
+    transition: all var(--transition);
+  }
+  .contact-link:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 24px rgba(0, 212, 170, 0.08);
+    transform: translateX(4px);
+  }
+  .contact-link .icon {
+    font-size: 1.3rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface);
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  /* ========== Timeline / Experience ========== */
+  .timeline {
+    position: relative;
+    padding-left: 24px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 1px;
+    background: var(--border);
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 28px;
+    padding-left: 20px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: calc(-24px - 3.5px);
+    top: 7px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 10px var(--accent-glow);
+  }
+  .timeline-item .date {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    margin-bottom: 4px;
+  }
+  .timeline-item .title {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .timeline-item .desc {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+  }
+
+  /* ========== Footer ========== */
+  .footer {
+    text-align: center;
+    padding: 40px 0 20px;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-family: var(--font-mono);
+  }
+  .footer span {
+    color: var(--accent);
+  }
+
+  /* ========== Glitch effect on hover for name ========== */
+  @keyframes glitch {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-1px, 1px); }
+    40% { transform: translate(1px, -1px); }
+    60% { transform: translate(-1px, -1px); }
+    80% { transform: translate(1px, 1px); }
+  }
+  .hero h1:hover {
+    animation: glitch 0.3s ease-in-out;
+  }
+</style>
+</head>
+<body>
+
+<!-- Background effects -->
+<div class="bg-grid"></div>
+<div class="bg-glow bg-glow--top"></div>
+<div class="bg-glow bg-glow--bottom"></div>
+
+<main class="container">
+
+  <!-- ===== Hero ===== -->
+  <header class="hero">
+    <div class="avatar">李</div>
+    <h1>李云龙</h1>
+    <p class="tagline">
+      <span id="typewriter"></span><span class="cursor"></span>
+    </p>
+  </header>
+
+  <!-- ===== 关于我 ===== -->
+  <section class="section">
+    <h2 class="section-title">关于我</h2>
+    <p style="color: var(--text-secondary); margin-bottom: 28px; font-size: 1rem;">
+      一名专注于医学图像算法的工程师，致力于用 AI 技术解决临床影像中的真实问题。
+      相信算法有温度，每一行代码都在为精准医疗贡献力量。
+      目前在睿华辰医疗从事图像算法研发，深耕医学图像处理与深度学习交叉领域。
+    </p>
+    <div class="intro-grid">
+      <div class="intro-card">
+        <div class="label">📍 所在地</div>
+        <div class="value">中国 · 北京</div>
+      </div>
+      <div class="intro-card">
+        <div class="label">💼 职位</div>
+        <div class="value">图像算法工程师</div>
+      </div>
+      <div class="intro-card">
+        <div class="label">🎓 学历</div>
+        <div class="value">生物医学工程 硕士<small> · 2023-2026</small></div>
+        <div class="value" style="margin-top:6px;">生物医学工程 本科<small> · 2019-2023</small></div>
+      </div>
+      <div class="intro-card">
+        <div class="label">📧 邮箱</div>
+        <div class="value" style="font-family: var(--font-mono);">yunlongli@tju.edu.cn</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 技能栈 ===== -->
+  <section class="section">
+    <h2 class="section-title">技术栈</h2>
+    <div class="skills-row">
+      <span class="skill-tag"><span class="dot dot--blue"></span> Python</span>
+      <span class="skill-tag"><span class="dot dot--green"></span> PyTorch</span>
+      <span class="skill-tag"><span class="dot dot--purple"></span> OpenCV</span>
+      <span class="skill-tag"><span class="dot dot--blue"></span> 医学图像处理</span>
+      <span class="skill-tag"><span class="dot dot--green"></span> DICOM</span>
+      <span class="skill-tag"><span class="dot dot--purple"></span> Deep Learning</span>
+      <span class="skill-tag"><span class="dot dot--blue"></span> MONAI</span>
+      <span class="skill-tag"><span class="dot dot--green"></span> SimpleITK</span>
+      <span class="skill-tag"><span class="dot dot--purple"></span> 图像分割</span>
+      <span class="skill-tag"><span class="dot dot--blue"></span> Linux / Git</span>
+      <span class="skill-tag"><span class="dot dot--green"></span> 图像配准</span>
+      <span class="skill-tag"><span class="dot dot--purple"></span> CT/MRI 影像分析</span>
+    </div>
+  </section>
+
+  <!-- ===== 工作经历 ===== -->
+  <section class="section">
+    <h2 class="section-title">工作经历</h2>
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="date">2026.04 — 至今</div>
+        <div class="title">图像算法工程师 · 睿华辰医疗</div>
+        <div class="desc">从事医学图像算法研发，利用深度学习技术解决临床影像辅助诊断问题。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2025.12 — 2026.02</div>
+        <div class="title">图像算法工程师 · 北京悦琦医疗</div>
+        <div class="desc">负责医学图像处理算法开发与优化，参与医疗设备软件研发。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2025.05 — 2025.08</div>
+        <div class="title">数据运营 · 北京阶跃星辰</div>
+        <div class="desc">参与 AI 模型训练数据的管理与质量把控，支持大模型数据管线建设。</div>
+      </div>
+      <div class="timeline-item">
+        <div class="date">2023.02 — 2023.05</div>
+        <div class="title">放疗科实习 · 天津医科大学肿瘤医院</div>
+        <div class="desc">在放疗科参与医学影像相关临床实践，了解放疗计划中的图像处理流程。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 联系我 / QR ===== -->
+  <section class="section">
+    <h2 class="section-title">联系我</h2>
+    <div class="contact-grid">
+      <div class="qr-wrapper">
+        <div class="qr-box">
+          <img src="URL.jpg" alt="微信二维码" style="width:100%;height:100%;border-radius:8px;" />
+        </div>
+        <span class="qr-label">微信扫码添加好友</span>
+      </div>
+
+      <div class="contact-links">
+        <a class="contact-link" href="mailto:yunlongli@tju.edu.cn">
+          <span class="icon">📧</span> yunlongli@tju.edu.cn
+        </a>
+        <a class="contact-link" href="#" target="_blank" rel="noopener">
+          <span class="icon">💬</span> 微信: LiYunLongLF
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Footer ===== -->
+  <footer class="footer">
+    <p>© 2024 <span>李云龙</span> · Built with ❤️ and pure HTML/CSS · 持续学习，保持好奇</p>
+  </footer>
+
+</main>
+
+<!-- ========== Typewriter script ========== -->
+<script>
+  (function() {
+    const phrases = [
+      '医学图像算法工程师',
+      '专注于 AI + 医学影像 · PyTorch · 深度学习',
+      '用算法为精准医疗赋能',
+      'Let\'s build something amazing ✨'
+    ];
+    const el = document.getElementById('typewriter');
+    let phraseIdx = 0;
+    let charIdx = 0;
+    let isDeleting = false;
+    let wait = false;
+
+    function tick() {
+      const current = phrases[phraseIdx];
+      if (isDeleting) {
+        el.textContent = current.substring(0, charIdx - 1);
+        charIdx--;
+      } else {
+        el.textContent = current.substring(0, charIdx + 1);
+        charIdx++;
+      }
+
+      let speed = isDeleting ? 30 : 70;
+
+      if (!isDeleting && charIdx === current.length) {
+        speed = 2000;
+        isDeleting = true;
+      } else if (isDeleting && charIdx === 0) {
+        isDeleting = false;
+        phraseIdx = (phraseIdx + 1) % phrases.length;
+        speed = 400;
+      }
+
+      setTimeout(tick, speed);
+    }
+
+    setTimeout(tick, 500);
+  })();
+</script>
+
+</body>
+</html>
